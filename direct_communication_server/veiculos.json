@@ -1,0 +1,5 @@
+[
+    { "idVeiculo": "CAR-01", "baseLat": -3.730, "baseLong": -38.510 },
+    { "idVeiculo": "CAR-02", "baseLat": -3.729, "baseLong": -38.511 },
+    { "idVeiculo": "CAR-03", "baseLat": -3.731, "baseLong": -38.509 }
+]
