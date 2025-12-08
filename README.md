@@ -1,5 +1,4 @@
-# Comunicação Direta (Socket TCP) -- Sistema de Controle de Frotas
-
+# Comunicação Direta (Socket TCP)
 ## Sistema de Controle de Frotas
 
 Este projeto implementa o **Cenário A -- Comunicação Direta** da prática
