@@ -1,5 +1,37 @@
 [
-    { "idVeiculo": "CAR-01", "baseLat": -3.730, "baseLong": -38.510 },
-    { "idVeiculo": "CAR-02", "baseLat": -3.729, "baseLong": -38.511 },
-    { "idVeiculo": "CAR-03", "baseLat": -3.731, "baseLong": -38.509 }
+    { "idVeiculo": "CAR-01", "baseLat": -3.7289, "baseLong": -40.9918 },
+    { "idVeiculo": "CAR-02", "baseLat": -3.7305, "baseLong": -40.9942 },
+    { "idVeiculo": "CAR-03", "baseLat": -3.7321, "baseLong": -40.9904 },
+    { "idVeiculo": "CAR-04", "baseLat": -3.7268, "baseLong": -40.9951 },
+    { "idVeiculo": "CAR-05", "baseLat": -3.7254, "baseLong": -40.9927 },
+
+    { "idVeiculo": "CAR-06", "baseLat": -3.7297, "baseLong": -40.9889 },
+    { "idVeiculo": "CAR-07", "baseLat": -3.7318, "baseLong": -40.9873 },
+    { "idVeiculo": "CAR-08", "baseLat": -3.7334, "baseLong": -40.9929 },
+    { "idVeiculo": "CAR-09", "baseLat": -3.7281, "baseLong": -40.9974 },
+    { "idVeiculo": "CAR-10", "baseLat": -3.7262, "baseLong": -40.9895 },
+
+    { "idVeiculo": "CAR-11", "baseLat": -3.7247, "baseLong": -40.9868 },
+    { "idVeiculo": "CAR-12", "baseLat": -3.7234, "baseLong": -40.9903 },
+    { "idVeiculo": "CAR-13", "baseLat": -3.7239, "baseLong": -40.9948 },
+    { "idVeiculo": "CAR-14", "baseLat": -3.7342, "baseLong": -40.9955 },
+    { "idVeiculo": "CAR-15", "baseLat": -3.7351, "baseLong": -40.9912 },
+
+    { "idVeiculo": "CAR-16", "baseLat": -3.7367, "baseLong": -40.9897 },
+    { "idVeiculo": "CAR-17", "baseLat": -3.7379, "baseLong": -40.9934 },
+    { "idVeiculo": "CAR-18", "baseLat": -3.7361, "baseLong": -40.9963 },
+    { "idVeiculo": "CAR-19", "baseLat": -3.7312, "baseLong": -40.9981 },
+    { "idVeiculo": "CAR-20", "baseLat": -3.7285, "baseLong": -40.9849 },
+
+    { "idVeiculo": "CAR-21", "baseLat": -3.7309, "baseLong": -40.9835 },
+    { "idVeiculo": "CAR-22", "baseLat": -3.7347, "baseLong": -40.9852 },
+    { "idVeiculo": "CAR-23", "baseLat": -3.7273, "baseLong": -40.9827 },
+    { "idVeiculo": "CAR-24", "baseLat": -3.7251, "baseLong": -40.9858 },
+    { "idVeiculo": "CAR-25", "baseLat": -3.7383, "baseLong": -40.9879 },
+
+    { "idVeiculo": "CAR-26", "baseLat": -3.7395, "baseLong": -40.9918 },
+    { "idVeiculo": "CAR-27", "baseLat": -3.7399, "baseLong": -40.9951 },
+    { "idVeiculo": "CAR-28", "baseLat": -3.7228, "baseLong": -40.9932 },
+    { "idVeiculo": "CAR-29", "baseLat": -3.7221, "baseLong": -40.9889 },
+    { "idVeiculo": "CAR-30", "baseLong": -40.9971, "baseLat": -3.7242 }
 ]

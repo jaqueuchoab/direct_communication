@@ -65,7 +65,7 @@ def socket_server():
 
         timestamp_recebido = time.time()
 
-        print(f"\n📩 Status recebido de {id_veic}:")
+        print(f"\nStatus recebido de {id_veic}:")
         print(status)
 
         # registra último status
@@ -88,9 +88,9 @@ def socket_server():
         combustivel = status["combustivel"]
 
         if combustivel < 10:
-            resposta += " | COMBUSTÍVEL CRÍTICO"
+            resposta += "COMBUSTÍVEL CRÍTICO"
         elif combustivel < 20:
-            resposta += " | COMBUSTÍVEL BAIXO"
+            resposta += "COMBUSTÍVEL BAIXO"
 
         conn.send(resposta.encode())
         conn.close()
@@ -107,43 +107,210 @@ HTML = """
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<title>Painel da Frota</title>
-<style>
-body { font-family: Arial; background: #f5f5f5; padding: 20px; }
-.card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
-.online { color: green; font-weight: bold; }
-.offline { color: red; font-weight: bold; }
-.semdados { color: gray; font-weight: bold; }
-</style>
-<script>
-async function atualizar() {
-    const res = await fetch('/status');
-    const dados = await res.json();
+    <meta charset="UTF-8">
+    <title>Painel da Frota</title>
 
-    let div = document.getElementById("conteudo");
-    div.innerHTML = "";
+    <link rel="icon" type="image/png" href="./static/favcon.ico">
 
-    dados.forEach(v => {
-        div.innerHTML += `
-        <div class='card'>
-            <h2>${v.id}</h2>
-            <p>Status: <span class="${v.estado.toLowerCase()}">${v.estado}</span></p>
-            <p>Última atualização: ${v.ultima_atualizacao}</p>
-            <p>Combustível: ${v.combustivel}%</p>
-            <p>Velocidade: ${v.velocidade} km/h</p>
-            <p>Alerta: ${v.alerta}</p>
-        </div>`;
-    });
-}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-setInterval(atualizar, 3000);
-window.onload = atualizar;
-</script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+        
+        h1 {
+            color: #FFF;
+            font-weight: 600;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+
+            font-family: Inter; 
+            background: #2d2276;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: 1fr;
+            grid-gap: 1rem;
+
+            width: 85%;
+            margin-bottom: 20px;
+        }
+        
+        .card { 
+            color: #120850;
+            background: #f1f0ff; 
+            padding: 15px;
+            border-radius: 10px; 
+            box-shadow: 0 0 5px #ccc; 
+        }
+
+        .card > h2 {
+            text-align: center;
+            margin: 0 0 15px 0;
+        }
+
+        .card-dados {
+            background: #c8bfff;
+            padding: 5px 20px;
+            border-radius: 10px;
+        }
+
+        .card-dados > p {
+            margin: 5px 0;
+        }
+
+        .card-dados > p > span {
+            font-weight: bold;
+        }
+        
+        .online { 
+            color: green;
+        }
+        
+        .offline { 
+            color: red; 
+        }
+
+        .critico {
+            color: red;
+        }
+
+        .baixo {
+            color: #d43d05;
+        }
+
+        .normal {
+            color: green;
+        }
+
+        #toggle {
+            margin: 10px 0 20px 0; 
+            padding: 10px 20px; 
+            border: none; 
+            background: #f1f0ff; 
+            color: #120850; 
+            font-weight: 600; 
+            font-size: 16px;
+            border-radius: 10px; 
+            cursor: pointer;
+        }
+
+        #map {
+            height: 400px;
+            margin: 0 0 40px 0;
+            border-radius: 10px;
+            box-shadow: 0 0 5px #ccc;
+            width: 85%;
+        }
+
+        .veic-map {
+            background: #f4642f;
+            width: 100%;
+            color: #120850;
+            border-radius: 10px; 
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding-bottom: 40px;
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        let mapa;
+        let marcadores = {};
+
+        function iniciarMapa() {
+            mapa = L.map("map").setView([-3.7288, -40.9923], 15);
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                maxZoom: 19
+            }).addTo(mapa);
+        }
+
+        let mostrarTodos = false;
+
+        async function atualizar() {
+            const res = await fetch('/status');
+            const dados = await res.json();
+
+            let div = document.querySelector(".content");
+            div.innerHTML = "";
+
+            let listaExibida = mostrarTodos ? dados : dados.slice(0, 5);
+
+            listaExibida.forEach(v => {
+                div.innerHTML += `
+                <div class='card'>
+                    <h2>${v.id}</h2>
+                    <div class='card-dados'>
+                        <p>Status:</br> <span class="${v.estado.toLowerCase()}">${v.estado}</span></p>
+                        <p>Última atualização:</br> <span>${v.ultima_atualizacao}</span></p>
+                        <p>Combustível:</br> <span>${v.combustivel}%</span></p>
+                        <p>Velocidade:</br> <span>${v.velocidade} km/h</span></p>
+                        <p>Alerta:</br> <span class="${v.alerta.toLowerCase().replace('í', 'i')}">${v.alerta}</span></p>
+                    </div>
+                </div>`;
+            });
+
+            dados.forEach(v => {
+                if (v.lat && v.long) {
+                    let cor;
+
+                    if (v.estado === "ONLINE") cor = "green";
+                    else if (v.estado === "OFFLINE") cor = "red";
+                    else cor = "gray";
+
+                    let icone = L.icon({
+                        iconUrl: `https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-${cor}.png`,
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41]
+                    });
+
+                    if (marcadores[v.id]) {
+                        marcadores[v.id].setLatLng([v.lat, v.long]);
+                        marcadores[v.id].setIcon(icone);
+                    } else {
+                        marcadores[v.id] = L.marker([v.lat, v.long], { icon: icone })
+                            .addTo(mapa)
+                            .bindPopup(`<b>${v.id}</b><br>${v.estado}`);
+                    }
+                }
+            });
+
+            document.getElementById("toggle").textContent = 
+            mostrarTodos ? "Mostrar Menos" : "Mostrar Mais";
+        }
+
+        setInterval(atualizar, 3000);
+        window.onload = () => {
+            iniciarMapa();
+            atualizar();
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("toggle").onclick = () => {
+                mostrarTodos = !mostrarTodos;
+                atualizar();
+            };
+        });
+    </script>
 </head>
 <body>
-<h1>Painel de Monitoramento da Frota</h1>
-<div id="conteudo"></div>
+    <h1>Monitoramento de Frota</h1>
+    <div class="content"></div>
+    <button id="toggle">Mostrar Mais</button>
+    <div class="veic-map">
+        <h1>Acompanhamento de Veículos</h1>
+        <div id="map"></div>
+    </div>
 </body>
 </html>
 """
@@ -168,21 +335,25 @@ def get_status():
         if dado:
             combustivel = dado["combustivel"]
             velocidade = dado["velocidade"]
-            alerta = ""
 
             if combustivel < 10:
                 alerta = "CRÍTICO"
             elif combustivel < 20:
-                alerta = "Baixo"
+                alerta = "BAIXO"
             else:
-                alerta = "OK"
+                alerta = "NORMAL"
 
             ultima = time.strftime("%H:%M:%S", time.localtime(last_update[vid]))
+
+            lat = dado["localizacao"]["lat"]
+            long = dado["localizacao"]["long"]
         else:
-            combustivel = "-"
-            velocidade = "-"
-            alerta = "-"
-            ultima = "-"
+            combustivel = "Dados indisponíveis"
+            velocidade = "Dados indisponíveis"
+            alerta = "Dados indisponíveis"
+            ultima = "Dados indisponíveis"
+            lat = None
+            long = None
 
         resposta.append({
             "id": vid,
@@ -190,10 +361,13 @@ def get_status():
             "ultima_atualizacao": ultima,
             "combustivel": combustivel,
             "velocidade": velocidade,
-            "alerta": alerta
+            "alerta": alerta,
+            "lat": lat,
+            "long": long
         })
 
     return jsonify(resposta)
+
 
 
 # Inicia o servidor web Flask
