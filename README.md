@@ -126,7 +126,6 @@ O cliente envia:
   "localizacao": { "lat": -3.73, "long": -38.51 },
   "combustivel": 42,
   "velocidade": 60,
-  "status": "operando",
   "hora": "2025-12-06 14:35:20"
 }
 ```
@@ -137,7 +136,7 @@ O servidor responde:
 
 Ou alertas como:
 
-    STATUS RECEBIDO COM ATRASO | COMBUSTÍVEL BAIXO
+    STATUS RECEBIDO COM ATRASO
 
 ------------------------------------------------------------------------
 
