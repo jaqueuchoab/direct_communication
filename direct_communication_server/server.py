@@ -22,10 +22,10 @@ ultimo_status = {}
 # THREAD PARA VERIFICAR VEÍCULO OFFLINE
 def verificar_offline():
     while True:
-        agora = time.time()
+        now = time.time()
         for vid in ids_validos:
             if vid in last_update:
-                diff = agora - last_update[vid]
+                diff = now - last_update[vid]
                 if diff > 20:
                     status_atual[vid] = "OFFLINE"
             else:
@@ -254,7 +254,7 @@ HTML = """
                         <p>Status:</br> <span class="${v.estado.toLowerCase()}">${v.estado}</span></p>
                         <p>Última atualização:</br> <span>${v.ultima_atualizacao}</span></p>
                         <p>Combustível:</br> <span>${v.combustivel}%</span></p>
-                        <p>Velocidade:</br> <span>${v.velocidade} km/h</span></p>
+                        <p>Velocidade:</br> <span>${v.velocidade} km/h</br> - ${v.situation}</span></p>
                         <p>Alerta:</br> <span class="${v.alerta.toLowerCase().replace('í', 'i')}">${v.alerta}</span></p>
                     </div>
                 </div>`;
@@ -280,7 +280,7 @@ HTML = """
                     } else {
                         marcadores[v.id] = L.marker([v.lat, v.long], { icon: icone })
                             .addTo(mapa)
-                            .bindPopup(`<b>${v.id}</b><br>${v.estado}`);
+                            .bindPopup(`<b>${v.id}</b><br>`);
                     }
                 }
             });
@@ -343,6 +343,13 @@ def get_status():
             else:
                 alerta = "NORMAL"
 
+            if (velocidade == 0): 
+                situation = "PARADO"
+            elif (velocidade > 0 and velocidade <= 60):
+                situation = "OPERANDO"
+            elif (velocidade > 60):
+                situation = "EM ALERTA"
+
             ultima = time.strftime("%H:%M:%S", time.localtime(last_update[vid]))
 
             lat = dado["localizacao"]["lat"]
@@ -352,6 +359,7 @@ def get_status():
             velocidade = "Dados indisponíveis"
             alerta = "Dados indisponíveis"
             ultima = "Dados indisponíveis"
+            situation = "Dados indisponíveis"
             lat = None
             long = None
 
@@ -362,6 +370,7 @@ def get_status():
             "combustivel": combustivel,
             "velocidade": velocidade,
             "alerta": alerta,
+            "situation": situation,
             "lat": lat,
             "long": long
         })
