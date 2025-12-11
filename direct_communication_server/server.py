@@ -19,7 +19,7 @@ last_update = {}
 status_atual = {}
 ultimo_status = {}  
 
-# THREAD PARA VERIFICAR VEÍCULO OFFLINE
+# função que verifica se o veiculo está online ou offline, roda a cada 5s e se o veiculo passou mais de 20s sem status é marcado como off
 def verificar_offline():
     while True:
         now = time.time()
@@ -32,29 +32,34 @@ def verificar_offline():
                 status_atual[vid] = "SEM DADOS"
         time.sleep(5)
 
+# thread que roda a função de verificação de status a cada 5s 
 thread_checker = threading.Thread(target=verificar_offline)
 thread_checker.daemon = True
 thread_checker.start()
 
-# SERVIDOR SOCKET
+# definição do servidor - imprime os logs no terminal
 def socket_server():
     server = socket.socket()
+    # estabelece por onde será feita a comunicação, podendo receber e enviar dados
     server.bind((HOST, PORT))
+    # dá inicio à escuta de seus clientes
     server.listen()
 
     print(f"Servidor Socket iniciado em {HOST}:{PORT}")
 
     while True:
+        # defije a aceitação de mensagens de seus clientes (veiculos)
         conn, addr = server.accept()
+        # recebe o json enviado por cada cliente
         data = conn.recv(4096).decode()
 
-        # Cliente pedindo lista de veículos
+        # solicitação da lista de veículos
         if data == "GET_VEICULOS":
             conn.send(json.dumps(veiculos_cadastrados).encode())
             conn.close()
             continue
 
-        # Cliente enviou status
+        # recebimento de envio de status do cliente, como a unica coisa que será recebida são os status não é necessário definir uma mensagem
         status = json.loads(data)
         id_veic = status["idVeiculo"]
 
@@ -63,6 +68,7 @@ def socket_server():
             conn.close()
             continue
 
+        # horário de recebimento dos dados
         timestamp_recebido = time.time()
 
         print(f"\nStatus recebido de {id_veic}:")
@@ -71,7 +77,7 @@ def socket_server():
         # registra último status
         ultimo_status[id_veic] = status
 
-        # Verifica atraso
+        # verifica atraso se já há algum status disponível, se não, indica o recebimento de primeiro status
         if id_veic in last_update:
             diff = timestamp_recebido - last_update[id_veic]
             if diff > 6:
@@ -84,7 +90,7 @@ def socket_server():
         last_update[id_veic] = timestamp_recebido
         status_atual[id_veic] = "ONLINE"
 
-        # Regra de combustível
+        # regra de combustível
         combustivel = status["combustivel"]
 
         if combustivel < 10:
@@ -94,7 +100,6 @@ def socket_server():
 
         conn.send(resposta.encode())
         conn.close()
-
 
 thread_socket = threading.Thread(target=socket_server)
 thread_socket.daemon = True
@@ -319,7 +324,9 @@ HTML = """
 def painel():
     return render_template_string(HTML)
 
+# rota que serve os status de forma analisada
 @app.route("/status")
+# função que processa e transforma os dados internos em JSON para o navegador 
 def get_status():
     resposta = []
 
@@ -327,15 +334,19 @@ def get_status():
         vid = v["idVeiculo"]
         dado = ultimo_status.get(vid, None)
 
+        # para cada veiculo dentro de status atual, se não houver nenhum, define estado do veiculo como sem dados
         if vid in status_atual:
             estado = status_atual[vid]
         else:
             estado = "SEM DADOS"
 
+        # verifica se há status existente na variável dado, 
+        # se sim processa as informações dele e se não retorna um JSON indicando a indisponibilidade dos dados
         if dado:
             combustivel = dado["combustivel"]
             velocidade = dado["velocidade"]
 
+            # processamento dos dados de combustível, verificações necessárias
             if combustivel < 10:
                 alerta = "CRÍTICO"
             elif combustivel < 20:
@@ -343,6 +354,7 @@ def get_status():
             else:
                 alerta = "NORMAL"
 
+            # processamento dos dados de velocidade, verificações necessárias
             if (velocidade == 0): 
                 situation = "PARADO"
             elif (velocidade > 0 and velocidade <= 60):
@@ -350,7 +362,7 @@ def get_status():
             elif (velocidade > 60):
                 situation = "EM ALERTA"
 
-            ultima = time.strftime("%H:%M:%S", time.localtime(last_update[vid]))
+            ultima_atual = time.strftime("%H:%M:%S", time.localtime(last_update[vid]))
 
             lat = dado["localizacao"]["lat"]
             long = dado["localizacao"]["long"]
@@ -358,7 +370,7 @@ def get_status():
             combustivel = "Dados indisponíveis"
             velocidade = "Dados indisponíveis"
             alerta = "Dados indisponíveis"
-            ultima = "Dados indisponíveis"
+            ultima_atual = "Dados indisponíveis"
             situation = "Dados indisponíveis"
             lat = None
             long = None
@@ -366,7 +378,7 @@ def get_status():
         resposta.append({
             "id": vid,
             "estado": estado,
-            "ultima_atualizacao": ultima,
+            "ultima_atualizacao": ultima_atual,
             "combustivel": combustivel,
             "velocidade": velocidade,
             "alerta": alerta,
@@ -377,8 +389,5 @@ def get_status():
 
     return jsonify(resposta)
 
-
-
-# Inicia o servidor web Flask
+# inicia o servidor web Flask
 app.run(host="0.0.0.0", port=8000, debug=False)
-
