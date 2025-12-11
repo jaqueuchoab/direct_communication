@@ -326,6 +326,7 @@ def painel():
 
 # rota que serve os status de forma analisada
 @app.route("/status")
+
 # função que processa e transforma os dados internos em JSON para o navegador 
 def get_status():
     resposta = []
